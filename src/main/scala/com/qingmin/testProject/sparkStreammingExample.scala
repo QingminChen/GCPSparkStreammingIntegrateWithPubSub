@@ -21,93 +21,108 @@ import org.apache.spark.streaming.pubsub.{PubsubUtils, SparkGCPCredentials}
 import com.google.protobuf.ByteString
 
 
-object sparkStreammingExample extends App with Logging {
+object sparkStreammingExample extends Logging {
 
+  def publishToPubSub( messageBT: ByteString, outputTopicNameStr: String, credentialsLocationPathStr: String, projectIDStr: String): Unit ={
+    logInfo("**********************************Qingmin*****************************************Method publishToPubSub start")
+    val futures = new util.ArrayList[ApiFuture[String]]
+//    val credentialsProvider = FixedCredentialsProvider.create(ServiceAccountCredentials.fromStream(new FileInputStream(credentialsJsonFilePathCluster.value)))
+//    val outputStandardTopicName = ProjectTopicName.of(projectIDCluster.value, outputTopicCluster.value)
+    val credentialsProvider = FixedCredentialsProvider.create(ServiceAccountCredentials.fromStream(new FileInputStream(credentialsLocationPathStr)))
+    val outputStandardTopicName = ProjectTopicName.of(projectIDStr, outputTopicNameStr)
+//    val credentialsProvider = FixedCredentialsProvider.create(ServiceAccountCredentials.fromStream(new FileInputStream("/home/testinggcpuser/AllServicesKey.json")))
+//    val outputStandardTopicName = ProjectTopicName.of("pubsub-test-project-16951", "pubsub-project16951-output-topic2")
+    val publisher = Publisher.newBuilder(outputStandardTopicName).setCredentialsProvider(credentialsProvider).build
 
+    try {
+      val pubsubMessage = PubsubMessage.newBuilder().setData(messageBT).build()
+      logInfo("**********************************Qingmin*****************************************15 => BT each :" + messageBT.isEmpty)
+      logInfo("**********************************Qingmin*****************************************15 => BT each :" + messageBT.isEmpty)
+      val future = publisher.publish(pubsubMessage)
+      futures.add(future)
 
-  val projectID = "pubsub-test-project-16951"
-  val subscription = "pubsub-project16951-subscription1"
-  val credentialsJsonFilePath = "C:\\Codes\\IntelliJ_IDEA_WORKSPACE\\Spark-DataProc-PubSub-Test\\src\\main\\resources\\AllServicesKey.json"
-  val sparkGCPCredentials = SparkGCPCredentials.builder.jsonServiceAccount(credentialsJsonFilePath).build()
-  val sparkSession : SparkSession = SparkSession.builder.master("local[4]").appName("DataProc Subsub SparkStreamming").getOrCreate()
+    } finally {
+      println("**********************************Qingmin*****************************************16 finally")
+      logInfo("**********************************Qingmin*****************************************16 finally")
+      logInfo("**********************************Qingmin*****************************************16 finally")
+      logInfo("**********************************Qingmin*****************************************futures size： " + futures.isEmpty)
 
-  val outputTopic = "pubsub-project16951-output-topic2"
-  val outputStandardTopicName = ProjectTopicName.of(projectID, outputTopic)
+      println("**********************************Qingmin*****************************************17 finally 2")
+      logInfo("**********************************Qingmin*****************************************17 finally 2")
+      // Wait on any pending requests
+      val messageIds = ApiFutures.allAsList(futures).get()
+      import scala.collection.JavaConversions._
+      for (messageId <- messageIds.toList) {
+        // System.out.println("TOPIC_ID: " + outputTopic + ", Send Confirmed Timestamp: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date) + ", MESSAGE_ID_IN_INPUT_TOPIC: " + messageId)
+        logInfo("**********************************Qingmin*****************************************18 -> TOPIC_ID: " + outputTopicNameStr + ", Send Confirmed Timestamp: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date) + ", MESSAGE_ID_IN_OUTPUT_TOPIC: " + messageId)
 
-  val sc = sparkSession.sparkContext
-  val ssc = new StreamingContext(sc, Seconds(20))
+        //logInfo("**********************************Qingmin*****************************************18 -> TOPIC_ID: " + outputTopicCluster.value + ", Send Confirmed Timestamp: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date) + ", MESSAGE_ID_IN_OUTPUT_TOPIC: " + messageId)
+        logInfo("**********************************Qingmin*****************************************This batch of publishing finished")
+      }
+      if (publisher != null) { // When finished with the publisher, shutdown to free up resources.
+        publisher.shutdown()
+      }
+    }
+  }
 
-//  PubsubUtils.createStream(,)
+  def main (args: Array[String]) {
+    val projectIDStr = "pubsub-test-project-16951"
+    val subscriptionStr = "pubsub-project16951-subscription1"
+    val outputTopicStr = "pubsub-project16951-output-topic2"
 
-  val futures = new util.ArrayList[ApiFuture[String]]
-  val credentialsProvider = FixedCredentialsProvider.create(ServiceAccountCredentials.fromStream(new FileInputStream(credentialsJsonFilePath)))
-  val publisher = Publisher.newBuilder(outputStandardTopicName).setCredentialsProvider(credentialsProvider).build
+    //val credentialsJsonFilePathStr = "C:\\Codes\\IntelliJ_IDEA_WORKSPACE\\Spark-DataProc-PubSub-Test\\src\\main\\resources\\AllServicesKey.json"    //local path
+    val credentialsJsonFilePathStr = "/home/testinggcpuser/AllServicesKey.json" //GCP Dataproc version
 
+    //val sparkSession : SparkSession = SparkSession.builder.master("local[4]").appName("DataProc Subsub SparkStreamming").getOrCreate()
+    val sparkSession: SparkSession = SparkSession.builder.appName("DataProc Subsub SparkStreamming").getOrCreate()
+    val sc = sparkSession.sparkContext
+    val ssc = new StreamingContext(sc, Seconds(10))
+//    val credentialsJsonFilePathCluster = sc.broadcast(credentialsJsonFilePathStr) //GCP Dataproc version
+//    val projectIDCluster = sc.broadcast(projectIDStr)
+//    val outputTopicCluster = sc.broadcast(outputTopicStr)
+    val sparkGCPCredentials = SparkGCPCredentials.builder.jsonServiceAccount(credentialsJsonFilePathStr).build()
+//    logInfo("**********************************Qingmin*****************************************Broadcast variable projectIDCluster: " + projectIDCluster.value)
+//    logInfo("**********************************Qingmin*****************************************Broadcast variable credentialsJsonFilePathCluster: " + credentialsJsonFilePathCluster.value)
+//    logInfo("**********************************Qingmin*****************************************Broadcast variable outputTopicCluster: " + outputTopicCluster.value)
+//
+//    logInfo("**********************************Qingmin*****************************************Broadcast variable projectIDCluster ID Long: " + projectIDCluster.id)
+//    logInfo("**********************************Qingmin*****************************************Broadcast variable projectIDCluster ID String: " + projectIDCluster.toString())
+//    logInfo("**********************************Qingmin*****************************************Broadcast variable credentialsJsonFilePathCluster ID Long: " + credentialsJsonFilePathCluster.id)
+//    logInfo("**********************************Qingmin*****************************************Broadcast variable credentialsJsonFilePathCluster ID String: " + credentialsJsonFilePathCluster.toString())
+//    logInfo("**********************************Qingmin*****************************************Broadcast variable outputTopicCluster ID Long: " + outputTopicCluster.id)
+//    logInfo("**********************************Qingmin*****************************************Broadcast variable outputTopicCluster ID String: " + outputTopicCluster.toString())
 
-  val pubsubReceiverInputDStream = PubsubUtils.createStream(ssc, projectID, None, subscription, sparkGCPCredentials, StorageLevel.MEMORY_AND_DISK_SER_2)
-  pubsubReceiverInputDStream.map(message =>
-    new String(message.getData(), StandardCharsets.UTF_8)
-  )
-//    .map( messageStr =>
-//    ByteString.copyFromUtf8(messageStr)
-//  ).foreachRDD( messageBT =>
-//    //  PubsubMessage.newBuilder().setData(messageBT).build()
-//    println(messageBT)
-//  )
-    .map( messageStr =>
-       ByteString.copyFromUtf8(messageStr)
+    val pubsubReceiverInputDStream = PubsubUtils.createStream(ssc, projectIDStr, None, subscriptionStr, sparkGCPCredentials, StorageLevel.MEMORY_AND_DISK_SER_2)
+    logInfo("**********************************Qingmin*****************************************Initialized finished")
+
+    pubsubReceiverInputDStream
+      .map(message =>
+        new String(message.getData(), StandardCharsets.UTF_8)
+      ).map(messageStr =>
+      ByteString.copyFromUtf8(messageStr)
+    ).foreachRDD(messageBTRDD =>
+      messageBTRDD.foreach(messageBT =>
+        publishToPubSub(messageBT, outputTopicStr, credentialsJsonFilePathStr, projectIDStr)
+      )
     )
 
-//    .foreachRDD( messageBTRDD =>
-//      println(messageBTRDD.isEmpty())
-//    )
+    ssc.start() // Start the computation
+    ssc.awaitTermination()
 
-      .foreachRDD( messageBTRDD =>
-        messageBTRDD.foreachPartition( msgBTPartition =>
-             for(msgBT <- msgBTPartition){
-               println("BT each :"+msgBT.isEmpty)
-               try {
+    while (true) {
+      Thread.sleep(300000)
+      ssc.stop(true, true)
 
-                 val pubsubMessage = PubsubMessage.newBuilder().setData(msgBT).build()
-                 val future = publisher.publish(pubsubMessage)
-                 futures.add(future)
+    }
 
-               } finally {
-                 println("finally")
-                 ApiFutures.allAsList(futures)
-                 println("finally 2")
-                 ApiFutures.allAsList(futures).get()
-                 // Wait on any pending requests
-                 val messageIds = ApiFutures.allAsList(futures).get()
-                 import scala.collection.JavaConversions._
-                 for (messageId <- messageIds.toList) {
-                   //System.out.println("TOPIC_ID: " + outputTopic + ", Send Confirmed Timestamp: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date) + ", MESSAGE_ID_IN_INPUT_TOPIC: " + messageId)
-                   logInfo("TOPIC_ID: " + outputTopic + ", Send Confirmed Timestamp: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date) + ", MESSAGE_ID_IN_OUTPUT_TOPIC: " + messageId)
-                 }
-//                 if (publisher != null) { // When finished with the publisher, shutdown to free up resources.
-//                   publisher.shutdown()
-//                 }
-               }
-             }
-           )
-      )
+    print("123")
 
-//    .foreachRDD( messageBTRDD =>
-//      messageBTRDD.foreachPartition( msgBTPartition =>
-//
-//           for(msgBT <- msgBTPartition){
-//             println(msgBT.isEmpty)
-//             val pubsubMessage = PubsubMessage.newBuilder().setData(msgBT).build()
-//             publisher.publish(pubsubMessage)
-//           }
-//
-//         )
-//    )
-
-  ssc.start()             // Start the computation
-  ssc.awaitTermination()
-  print("123")
-
-
-
+    /**
+      *  1. test broadcast variable and pass the argument with main menthod, it worked
+      *  1. test broadcast variable and pass the argument without main menthod, it doesn't work
+      *  2. test passing the argument with main menthod but without the broadcast variable, it worked
+      *  3. wrap up all the arguments needed in the method by passing  done
+      *  So it wasn't a matter of populating the broadcast variable across the cluster, it was a matter of whether or not which method to closure the code( main or inherited App)
+      */
+  }
 }
