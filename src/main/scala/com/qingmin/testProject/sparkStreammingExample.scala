@@ -26,12 +26,12 @@ object sparkStreammingExample extends Logging {
   def publishToPubSub( messageBT: ByteString, outputTopicNameStr: String, credentialsLocationPathStr: String, projectIDStr: String): Unit ={
     logInfo("**********************************Qingmin*****************************************Method publishToPubSub start")
     val futures = new util.ArrayList[ApiFuture[String]]
-//    val credentialsProvider = FixedCredentialsProvider.create(ServiceAccountCredentials.fromStream(new FileInputStream(credentialsJsonFilePathCluster.value)))
-//    val outputStandardTopicName = ProjectTopicName.of(projectIDCluster.value, outputTopicCluster.value)
+    //    val credentialsProvider = FixedCredentialsProvider.create(ServiceAccountCredentials.fromStream(new FileInputStream(credentialsJsonFilePathCluster.value)))
+    //    val outputStandardTopicName = ProjectTopicName.of(projectIDCluster.value, outputTopicCluster.value)
     val credentialsProvider = FixedCredentialsProvider.create(ServiceAccountCredentials.fromStream(new FileInputStream(credentialsLocationPathStr)))
     val outputStandardTopicName = ProjectTopicName.of(projectIDStr, outputTopicNameStr)
-//    val credentialsProvider = FixedCredentialsProvider.create(ServiceAccountCredentials.fromStream(new FileInputStream("/home/testinggcpuser/AllServicesKey.json")))
-//    val outputStandardTopicName = ProjectTopicName.of("pubsub-test-project-16951", "pubsub-project16951-output-topic2")
+    //    val credentialsProvider = FixedCredentialsProvider.create(ServiceAccountCredentials.fromStream(new FileInputStream("/home/testinggcpuser/AllServicesKey.json")))
+    //    val outputStandardTopicName = ProjectTopicName.of("pubsub-test-project-16951", "pubsub-project16951-output-topic2")
     val publisher = Publisher.newBuilder(outputStandardTopicName).setCredentialsProvider(credentialsProvider).build
 
     try {
@@ -70,27 +70,29 @@ object sparkStreammingExample extends Logging {
     val subscriptionStr = "pubsub-project16951-subscription1"
     val outputTopicStr = "pubsub-project16951-output-topic2"
 
-    //val credentialsJsonFilePathStr = "C:\\Codes\\IntelliJ_IDEA_WORKSPACE\\Spark-DataProc-PubSub-Test\\src\\main\\resources\\AllServicesKey.json"    //local path
-    val credentialsJsonFilePathStr = "/home/testinggcpuser/AllServicesKey.json" //GCP Dataproc version
+    //val credentialsJsonFilePathStr = "C:\\Codes\\IntelliJ_IDEA_WORKSPACE\\Spark-DataProc-PubSub-Test\\src\\main\\resources\\AllServicesKey.json"    //windows local path
+    //val credentialsJsonFilePathStr = "/home/testinggcpuser/AllServicesKey.json" //GCP Dataproc cluster version
+    //val credentialsJsonFilePathStr = "/Users/chenqingmin/Codes/Github_Tools_Workspace/GCPSparkStreammingIntegrateWithPubSub/src/main/resources/AllServicesKey.json" //Mac laptop local version
+    val credentialsJsonFilePathStr = "/opt/spark/myselfCert/AllServicesKey.json" //Mac laptop K8s cluster version
 
     //val sparkSession : SparkSession = SparkSession.builder.master("local[4]").appName("DataProc Subsub SparkStreamming").getOrCreate()
     val sparkSession: SparkSession = SparkSession.builder.appName("DataProc Subsub SparkStreamming").getOrCreate()
     val sc = sparkSession.sparkContext
     val ssc = new StreamingContext(sc, Seconds(10))
-//    val credentialsJsonFilePathCluster = sc.broadcast(credentialsJsonFilePathStr) //GCP Dataproc version
-//    val projectIDCluster = sc.broadcast(projectIDStr)
-//    val outputTopicCluster = sc.broadcast(outputTopicStr)
+    //    val credentialsJsonFilePathCluster = sc.broadcast(credentialsJsonFilePathStr) //GCP Dataproc version
+    //    val projectIDCluster = sc.broadcast(projectIDStr)
+    //    val outputTopicCluster = sc.broadcast(outputTopicStr)
     val sparkGCPCredentials = SparkGCPCredentials.builder.jsonServiceAccount(credentialsJsonFilePathStr).build()
-//    logInfo("**********************************Qingmin*****************************************Broadcast variable projectIDCluster: " + projectIDCluster.value)
-//    logInfo("**********************************Qingmin*****************************************Broadcast variable credentialsJsonFilePathCluster: " + credentialsJsonFilePathCluster.value)
-//    logInfo("**********************************Qingmin*****************************************Broadcast variable outputTopicCluster: " + outputTopicCluster.value)
-//
-//    logInfo("**********************************Qingmin*****************************************Broadcast variable projectIDCluster ID Long: " + projectIDCluster.id)
-//    logInfo("**********************************Qingmin*****************************************Broadcast variable projectIDCluster ID String: " + projectIDCluster.toString())
-//    logInfo("**********************************Qingmin*****************************************Broadcast variable credentialsJsonFilePathCluster ID Long: " + credentialsJsonFilePathCluster.id)
-//    logInfo("**********************************Qingmin*****************************************Broadcast variable credentialsJsonFilePathCluster ID String: " + credentialsJsonFilePathCluster.toString())
-//    logInfo("**********************************Qingmin*****************************************Broadcast variable outputTopicCluster ID Long: " + outputTopicCluster.id)
-//    logInfo("**********************************Qingmin*****************************************Broadcast variable outputTopicCluster ID String: " + outputTopicCluster.toString())
+    //    logInfo("**********************************Qingmin*****************************************Broadcast variable projectIDCluster: " + projectIDCluster.value)
+    //    logInfo("**********************************Qingmin*****************************************Broadcast variable credentialsJsonFilePathCluster: " + credentialsJsonFilePathCluster.value)
+    //    logInfo("**********************************Qingmin*****************************************Broadcast variable outputTopicCluster: " + outputTopicCluster.value)
+    //
+    //    logInfo("**********************************Qingmin*****************************************Broadcast variable projectIDCluster ID Long: " + projectIDCluster.id)
+    //    logInfo("**********************************Qingmin*****************************************Broadcast variable projectIDCluster ID String: " + projectIDCluster.toString())
+    //    logInfo("**********************************Qingmin*****************************************Broadcast variable credentialsJsonFilePathCluster ID Long: " + credentialsJsonFilePathCluster.id)
+    //    logInfo("**********************************Qingmin*****************************************Broadcast variable credentialsJsonFilePathCluster ID String: " + credentialsJsonFilePathCluster.toString())
+    //    logInfo("**********************************Qingmin*****************************************Broadcast variable outputTopicCluster ID Long: " + outputTopicCluster.id)
+    //    logInfo("**********************************Qingmin*****************************************Broadcast variable outputTopicCluster ID String: " + outputTopicCluster.toString())
 
     val pubsubReceiverInputDStream = PubsubUtils.createStream(ssc, projectIDStr, None, subscriptionStr, sparkGCPCredentials, StorageLevel.MEMORY_AND_DISK_SER_2)
     logInfo("**********************************Qingmin*****************************************Initialized finished")
@@ -118,11 +120,11 @@ object sparkStreammingExample extends Logging {
     print("123")
 
     /**
-      *  1. test broadcast variable and pass the argument with main menthod, it worked
-      *  1. test broadcast variable and pass the argument without main menthod, it doesn't work
-      *  2. test passing the argument with main menthod but without the broadcast variable, it worked
-      *  3. wrap up all the arguments needed in the method by passing  done
-      *  So it wasn't a matter of populating the broadcast variable across the cluster, it was a matter of whether or not which method to closure the code( main or inherited App)
-      */
+     *  1. test broadcast variable and pass the argument with main menthod, it worked
+     *  1. test broadcast variable and pass the argument without main menthod, it doesn't work
+     *  2. test passing the argument with main menthod but without the broadcast variable, it worked
+     *  3. wrap up all the arguments needed in the method by passing  done
+     *  So it wasn't a matter of populating the broadcast variable across the cluster, it was a matter of whether or not which method to closure the code( main or inherited App)
+     */
   }
 }

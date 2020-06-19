@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.qingmin.testProject</groupId>
+  <artifactId>sparkStreaming-pubsub-dataproc</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <name>sparkStreaming-pubsub-dataproc</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.example.com</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+    <!--<dependency>-->
+    <!--<groupId>junit</groupId>-->
+    <!--<artifactId>junit</artifactId>-->
+    <!--<version>4.11</version>-->
+    <!--<scope>test</scope>-->
+    <!--</dependency>-->
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-streaming_2.11</artifactId>
+      <version>2.4.5</version>
+      <!--<scope>provided</scope>-->   <!--For Dataproc-->
+      <scope>compile</scope>  <!--For Local Testing-->
+    </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-sql_2.11</artifactId>
+      <version>2.4.5</version>
+      <!--<scope>provided</scope>-->  <!--For Dataproc-->
+      <scope>compile</scope> <!--For Local Testing-->
+    </dependency>
+    <!--There is a  special case here, we just use pubsubutil to createStream, but we don't publisher, here it depends on guava-jdk5.17.0 which is not compatible with pubsub it self publisher guava-android 28.2-->
+    <dependency>
+      <groupId>org.apache.bahir</groupId>
+      <artifactId>spark-streaming-pubsub_2.11</artifactId>
+      <version>2.4.0</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava-jdk5</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!--<dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>28.2-jre</version>
+      <scope>compile</scope>
+    </dependency>-->
+
+    <!--<dependency>-->
+    <!--<groupId>com.google.api-client</groupId>-->
+    <!--<artifactId>google-api-client</artifactId>-->
+    <!--<version>1.30.9</version>-->
+    <!--</dependency>-->
+
+
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_2.11</artifactId>
+      <version>3.2.0-SNAP10</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.scalacheck</groupId>
+      <artifactId>scalacheck_2.11</artifactId>
+      <version>1.14.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-pubsub</artifactId>
+      <version>1.103.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.auth</groupId>
+      <artifactId>google-auth-library-appengine</artifactId>
+      <version>0.20.0</version>
+    </dependency>
+    <!--<dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>28.2-android</version>
+      <scope>compile</scope>
+    </dependency>-->
+  </dependencies>
+
+  <build>
+    <!--<pluginManagement>&lt;!&ndash; lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) &ndash;&gt;-->
+    <!--<plugins>-->
+    <!--&lt;!&ndash; clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle &ndash;&gt;-->
+    <!--<plugin>-->
+    <!--<artifactId>maven-clean-plugin</artifactId>-->
+    <!--<version>3.1.0</version>-->
+    <!--</plugin>-->
+    <!--&lt;!&ndash; default lifecycle, jar packaging: see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging &ndash;&gt;-->
+    <!--<plugin>-->
+    <!--<artifactId>maven-resources-plugin</artifactId>-->
+    <!--<version>3.0.2</version>-->
+    <!--</plugin>-->
+    <!--<plugin>-->
+    <!--<artifactId>maven-compiler-plugin</artifactId>-->
+    <!--<version>3.8.0</version>-->
+    <!--</plugin>-->
+    <!--<plugin>-->
+    <!--<artifactId>maven-surefire-plugin</artifactId>-->
+    <!--<version>2.22.1</version>-->
+    <!--</plugin>-->
+    <!--<plugin>-->
+    <!--<artifactId>maven-jar-plugin</artifactId>-->
+    <!--<version>3.0.2</version>-->
+    <!--</plugin>-->
+    <!--<plugin>-->
+    <!--<artifactId>maven-install-plugin</artifactId>-->
+    <!--<version>2.5.2</version>-->
+    <!--</plugin>-->
+    <!--<plugin>-->
+    <!--<artifactId>maven-deploy-plugin</artifactId>-->
+    <!--<version>2.8.2</version>-->
+    <!--</plugin>-->
+    <!--&lt;!&ndash; site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle &ndash;&gt;-->
+    <!--<plugin>-->
+    <!--<artifactId>maven-site-plugin</artifactId>-->
+    <!--<version>3.7.1</version>-->
+    <!--</plugin>-->
+    <!--<plugin>-->
+    <!--<artifactId>maven-project-info-reports-plugin</artifactId>-->
+    <!--<version>3.0.0</version>-->
+    <!--</plugin>-->
+    <!--</plugins>-->
+    <!--</pluginManagement>-->
+    <plugins>
+      <!--<plugin>-->
+      <!--<groupId>org.apache.maven.plugins</groupId>-->
+      <!--<artifactId>maven-assembly-plugin</artifactId>-->
+      <!--<configuration>-->
+      <!--<archive>-->
+      <!--<manifest>-->
+      <!--<mainClass>com.qingmin.testProject.sparkStreammingExample</mainClass>-->
+      <!--</manifest>-->
+      <!--</archive>-->
+      <!--<descriptorRefs>-->
+      <!--<descriptorRef>jar-with-dependencies</descriptorRef>-->
+      <!--</descriptorRefs>-->
+      <!--</configuration>-->
+      <!--<executions>-->
+      <!--<execution>-->
+      <!--<id>assembly</id>-->
+      <!--<phase>package</phase>-->
+      <!--<goals>-->
+      <!--<goal>single</goal>-->
+      <!--</goals>-->
+      <!--</execution>-->
+      <!--</executions>-->
+      <!--</plugin>-->
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.4</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <!--<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer">-->
+                  <mainClass>com.qingmin.testProject.sparkStreammingExample</mainClass>
+                </transformer>
+                <!--<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer">-->
+                <!--<resource>META-INF/services</resource>-->
+                <!--<file>io.grpc.LoadBalancerProvider</file>-->
+                <!--</transformer>-->
+                <!--<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer">-->
+                <!--<resource>META-INF/services</resource>-->
+                <!--<file>io.grpc.NameResolverProvider</file>-->
+                <!--</transformer>-->
+              </transformers>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/maven/**</exclude>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <relocations>
+                <!--<relocation>-->
+                <!--<pattern>com.google.common</pattern>-->
+                <!--<shadedPattern>repackage.com.google.common</shadedPattern>-->
+                <!--&lt;!&ndash;<excludes>&ndash;&gt;-->
+                <!--&lt;!&ndash;<exclude>org.codehaus.plexus.util.xml.Xpp3Dom</exclude>&ndash;&gt;-->
+                <!--&lt;!&ndash;<exclude>org.codehaus.plexus.util.xml.pull.*</exclude>&ndash;&gt;-->
+                <!--&lt;!&ndash;</excludes>&ndash;&gt;-->
+                <!--<includes>-->
+                <!--<include>com.google.common.**</include>-->
+                <!--</includes>-->
+                <!--</relocation>-->
+                <relocation>
+                  <pattern>com.google</pattern>
+                  <shadedPattern>repackage.com.google</shadedPattern>
+                  <includes>
+                    <include>com.google.**</include>
+                  </includes>
+                </relocation>
+              </relocations>
+
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.scala-tools</groupId>
+        <artifactId>maven-scala-plugin</artifactId>
+        <version>2.15.2</version>
+        <!--<groupId>net.alchim31.maven</groupId>-->
+        <!--<artifactId>scala-maven-plugin</artifactId>-->
+        <!--<version>4.1.0</version>-->
+        <executions>
+          <execution>
+            <goals>
+              <goal>compile</goal>
+              <goal>testCompile</goal>
+            </goals>
+            <configuration>
+              <scalaVersion>2.11.12</scalaVersion>
+              <!--<jvmArgs>-->
+              <!--<jvmArg>-Xss4m</jvmArg>-->
+              <!--<jvmArg>-Xms512m</jvmArg>-->
+              <!--<jvmArg>-Xmx4096m</jvmArg>-->
+              <!--</jvmArgs>-->
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--<plugin>-->
+      <!--<groupId>org.codehaus.mojo</groupId>-->
+      <!--<artifactId>exec-maven-plugin</artifactId>-->
+      <!--<version>1.6.0</version>-->
+      <!--<executions>-->
+      <!--<execution>-->
+      <!--<goals>-->
+      <!--<goal>java</goal>-->
+      <!--</goals>-->
+      <!--</execution>-->
+      <!--</executions>-->
+      <!--<configuration>-->
+      <!--<mainClass>com.qingmin.testProject.sparkStreammingExample</mainClass>-->
+      <!--</configuration>-->
+      <!--</plugin>-->
+    </plugins>
+
+  </build>
+</project>
