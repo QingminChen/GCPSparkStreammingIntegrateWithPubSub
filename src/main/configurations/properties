@@ -1,0 +1,16 @@
+spark.kubernetes.driver.container.image gcr.io/gke-cluster-testing-1/spark-2.4.7-bin-scala2.11.12-hadoop31-k8s-docker-pip:gke
+spark.kubernetes.executor.container.image gcr.io/gke-cluster-testing-1/spark-2.4.7-bin-scala2.11.12-hadoop31-k8s-docker-pip:gke
+spark.executor.instances 2
+
+# spark.kubernetes.driverEnv.GCS_PROJECT_ID gke-cluster-testing-1
+# spark.executorEnv.GCS_PROJECT_ID gke-cluster-testing-1
+# spark.kubernetes.driver.secrets.cloudstorageservicetestaccount /etc/secrets
+# spark.kubernetes.executor.secrets.cloudstorageservicetestaccount /etc/secrets
+# google.cloud.auth.service.account.enable true
+# google.cloud.auth.service.account.json.keyfile /home/testinggcpuser/gke-test/CloudStorageAllServicesKey.json
+
+
+
+####=============The following two are problematic, but don't why what locations will be Okay===============####
+# spark.kubernetes.driverEnv.GOOGLE_APPLICATION_CREDENTIALS /opt/spark/myselfCert/AllServicesKey.json
+# spark.executorEnv.GOOGLE_APPLICATION_CREDENTIALS /opt/spark/myselfCert/AllServicesKey.json
